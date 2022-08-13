@@ -45,7 +45,7 @@ TODO: What about supporting the different architectures supported by the base Ng
       mraming/docker-nginx-acme:stable-alpine
    ```
 
-5. Edit the ssl/acme.sh.conf file that now resides on the `nginx-acme-etc-vol` volume and update the email address.
+5. Edit the `ssl/acme.sh.conf` file that now resides on the `nginx-acme-etc-vol` volume and update the email address.
    (On my Ubuntu 22.04 test system, this file can be found in `/var/lib/docker/volumes/nginx-acme-etc-vol/_data/ssl` as root (sudo))
 
 6. Generate Diffie-Hellman-Parameter to further improve security, we generate Diffie-Hellman parameter with 4096 bits. This
@@ -58,11 +58,14 @@ TODO: What about supporting the different architectures supported by the base Ng
 
 6. Configure an http server by adding a configuration file to the `conf.d` folder on the `nginx-acme-etc-vol` volume.
    (see [sample-conf.d/example.com.conf](https://github.com/mraming/docker-nginx-acme/blob/main/sample-conf.d/example.com.conf) in this repository for a template).
-   Note: You must ommit the https server section initially when generating the associated SSL certificate for the first time, otherwise Nginx will not load the configuration due to the missing certificate files.
+   Note: You have toommit the https server section initially when generating the associated SSL certificate for the first time, otherwise Nginx will not load the configuration due to the missing certificate files.
+
+   You probably also want to remove the `default.conf` file here.
 
    Note: Mozilla has a great [SSL Configuration Generator](https://mozilla.github.io/server-side-tls/ssl-config-generator/) tool to help generate this configuration and the settings that we have in our default ssl/ssl.conf file.
 
-7. Test the new Nginx configuration and when no issues are found, reload it:
+7. Test the new Nginx configuration and when no issues are found, reload it.
+   Note: If you use DNS-01 based validation for your certificates, you can skip this set (and you don't have to ommit the https server configuration in the previous step; you can request the certificate first and then reload the Nginx configuration. For HTTP-01 validation, you have to first reload Nginx withou the HTTPS server configuration as described above.) 
    ```sh
    docker exec nginx-acme nginx -t
    docker exec nginx-acme nginx -s reload
@@ -93,6 +96,12 @@ TODO: What about supporting the different architectures supported by the base Ng
       --ocsp-must-staple
    ```
 
+   After the certificate has been renewed, Nginx must be reloaded again (test first):
+   ```sh
+   docker exec nginx-acme nginx -t
+   docker exec nginx-acme nginx -s reload
+   ```
+
 ## HOWTO Build and publish this docker container image
 
 1. Clone the git repo on a Linux machine with Docker installed - I used WSL2 on my Windows 10 machine with Docker Desktop
@@ -112,7 +121,7 @@ TODO: What about supporting the different architectures supported by the base Ng
    docker build --no-cache -t mraming/docker-nginx-acme .
    ```
 
-   Note: The first time I got an error message (which I unfortunately forgot to capture); the solution/workaround was to use the following command to build the image. On subsequent attempts I used the command above without problems:
+   Note: The first time I got an error message (`failed to solve with frontend dockerfile.v0: failed to read dockerfile: open /var/lib/docker/tmp/buildkit-mount494864957/Dockerfile: no such file or directory`); the solution/workaround was to use the following command to build the image. On subsequent attempts I used the command above without problems:
    ```sh
    DOCKER_BUILDKIT=0  docker build --no-cache -t mraming/docker-nginx-acme . 
    ```
