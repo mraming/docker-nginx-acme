@@ -1,10 +1,15 @@
-# Nginx image (based on the official Nginx image) with ACME.sh script for free and automated Let's Encrypt certs
+# Minimal Nginx image with ACME.sh script for free and automated Let's Encrypt certs
 
-**Nginx container image with the the [acme.sh](https://github.com/acmesh-official/acme.sh) ACME client installed for free and automated Let's Encrypt SSL certificates.**
+**Nginx container, based on the [Docker Official Nginx image](https://hub.docker.com/_/nginx/) image with [acme.sh](https://github.com/acmesh-official/acme.sh) installed for free and automated Let's Encrypt SSL certificates.**
 
 For now, this image is based on the nginx:stable-alpine image, to make it easy for me to generate up to date images when
 new versions of the base Nginx images are released.
-TODO: Using e.g. GitHub actions, automate the building and publishing of new images when new versions of the Nginx image are released.
+
+TODO: Using e.g. GitHub actions, automate the building and publishing of new images when new versions of the Nginx image are released. As part of this process, we should also add support for the other alpine based tags of the Nginx image.
+
+TODO: It shouldn't be hard to enhance this repo to also support the Debian based Nginx image tags.
+
+TODO: What about supporting the different architectures supported by the base Nginx image?
 
 ## HOWTO get an Nxinx reverse proxy up and running in a container with SSL certificates
 
@@ -52,7 +57,7 @@ TODO: Using e.g. GitHub actions, automate the building and publishing of new ima
    TODO: Automate this step so the dhparam.pem file is automatically generated the first time a container is started.
 
 6. Configure an http server by adding a configuration file to the `conf.d` folder on the `nginx-acme-etc-vol` volume.
-   (see `sample-conf.d/example.com.conf` in this repository for a template).
+   (see [sample-conf.d/example.com.conf](https://github.com/mraming/docker-nginx-acme/blob/main/sample-conf.d/example.com.conf) in this repository for a template).
    Note: You must ommit the https server section initially when generating the associated SSL certificate for the first time, otherwise Nginx will not load the configuration due to the missing certificate files.
 
    Note: Mozilla has a great [SSL Configuration Generator](https://mozilla.github.io/server-side-tls/ssl-config-generator/) tool to help generate this configuration and the settings that we have in our default ssl/ssl.conf file.
